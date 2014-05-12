@@ -389,7 +389,7 @@ class autofs (
   }
   
   # /etc/auto.master
-  file{ '/etc/auto.master'
+  file{ '/etc/auto.master':
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
     source  => "puppet///modules/${module_name}/auto.master",
@@ -397,7 +397,7 @@ class autofs (
   }
   
   # /etc/auto.home
-  file{ '/etc/auto.home'
+  file{ '/etc/auto.home':
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
     content  => template("puppet///modules/${module_name}/auto.home"),
@@ -405,7 +405,7 @@ class autofs (
   }
   
   # /etc/auto.nfs
-  file{ '/etc/auto.nfs'
+  file{ '/etc/auto.nfs':
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
     source  => template("puppet///modules/${module_name}/auto.nfs"),

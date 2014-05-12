@@ -15,7 +15,7 @@
 class autofs::params {
 
   ### Application related parameters
-
+  $autoconf_server = nfs.adaptavist.com
   $package = $::operatingsystem ? {
     default => 'autofs',
   }

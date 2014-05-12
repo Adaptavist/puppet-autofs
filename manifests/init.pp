@@ -210,6 +210,7 @@
 #   Alessandro Franceschi <al@lab42.it/>
 #
 class autofs (
+  $autoconf_server     = params_lookup( 'autoconf_server' ),
   $my_class            = params_lookup( 'my_class' ),
   $source              = params_lookup( 'source' ),
   $source_dir          = params_lookup( 'source_dir' ),
@@ -364,6 +365,53 @@ class autofs (
     audit   => $autofs::manage_audit,
     noop    => $autofs::noops,
   }
+
+  # rmdir /nethome 
+  file { '/nethome': 
+    ensure  => absent,
+    owner   => $autofs::config_file_owner,
+    group   => $autofs::config_file_group,
+    require => Package[$autofs::package],
+  }
+   # ln -sv /nfs/home /nethome
+  exec{ 'ln -sv /nfs/home /nethome':
+    command => 'ln -sv /nfs/home /nethome',
+    creates => '/nethome',
+    require => File['/nethome'],
+  }
+  
+  # mkdir -p /nfs/{software,scripts}
+  file { ['/nfs/home', '/nfs/scripts']: 
+    ensure  => present,
+    owner   => $autofs::config_file_owner,
+    group   => $autofs::config_file_group,
+    require => Package[$autofs::package],
+  }
+  
+  # /etc/auto.master
+  file{ '/etc/auto.master'
+    owner   => $autofs::config_file_owner,
+    group   => $autofs::config_file_group,
+    source  => "puppet///modules/${module_name}/auto.master",
+    require => Package[$autofs::package],
+  }
+  
+  # /etc/auto.home
+  file{ '/etc/auto.home'
+    owner   => $autofs::config_file_owner,
+    group   => $autofs::config_file_group,
+    content  => template("puppet///modules/${module_name}/auto.home"),
+    require => Package[$autofs::package],
+  }
+  
+  # /etc/auto.nfs
+  file{ '/etc/auto.nfs'
+    owner   => $autofs::config_file_owner,
+    group   => $autofs::config_file_group,
+    source  => template("puppet///modules/${module_name}/auto.nfs"),
+    require => Package[$autofs::package],
+  }
+
 
   # The whole autofs configuration directory can be recursively overriden
   if $autofs::source_dir {

@@ -351,20 +351,20 @@ class autofs (
     noop       => $autofs::noops,
   }
 
-  file { 'autofs.conf':
-    ensure  => $autofs::manage_file,
-    path    => $autofs::config_file,
-    mode    => $autofs::config_file_mode,
-    owner   => $autofs::config_file_owner,
-    group   => $autofs::config_file_group,
-    require => Package[$autofs::package],
-    notify  => $autofs::manage_service_autorestart,
-    source  => $autofs::manage_file_source,
-    content => $autofs::manage_file_content,
-    replace => $autofs::manage_file_replace,
-    audit   => $autofs::manage_audit,
-    noop    => $autofs::noops,
-  }
+  # file { 'autofs.conf':
+  #   ensure  => $autofs::manage_file,
+  #   path    => $autofs::config_file,
+  #   mode    => $autofs::config_file_mode,
+  #   owner   => $autofs::config_file_owner,
+  #   group   => $autofs::config_file_group,
+  #   require => Package[$autofs::package],
+  #   notify  => $autofs::manage_service_autorestart,
+  #   source  => $autofs::manage_file_source,
+  #   content => $autofs::manage_file_content,
+  #   replace => $autofs::manage_file_replace,
+  #   audit   => $autofs::manage_audit,
+  #   noop    => $autofs::noops,
+  # }
 
   # rmdir /nethome 
   file { '/nethome': 
@@ -381,8 +381,8 @@ class autofs (
   }
   
   # mkdir -p /nfs/{software,scripts}
-  file { ['/nfs/home', '/nfs/scripts']: 
-    ensure  => present,
+  file { ['/nfs', '/nfs/home', '/nfs/scripts']: 
+    ensure  => directory,
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
     require => Package[$autofs::package],
@@ -390,25 +390,28 @@ class autofs (
   
   # /etc/auto.master
   file{ '/etc/auto.master':
+    ensure  => present,
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
-    source  => "puppet///modules/${module_name}/auto.master",
+    source  => "puppet:///modules/${module_name}/auto.master",
     require => Package[$autofs::package],
   }
   
   # /etc/auto.home
   file{ '/etc/auto.home':
+    ensure  => present,
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
-    content  => template("puppet///modules/${module_name}/auto.home"),
+    content  => template("${module_name}/auto.home.erb"),
     require => Package[$autofs::package],
   }
   
   # /etc/auto.nfs
   file{ '/etc/auto.nfs':
+    ensure  => present,
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
-    source  => template("puppet///modules/${module_name}/auto.nfs"),
+    content  => template("${module_name}/auto.nfs.erb"),
     require => Package[$autofs::package],
   }
 

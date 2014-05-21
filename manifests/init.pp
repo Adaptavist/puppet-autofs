@@ -336,12 +336,17 @@ class autofs (
   }
 
   ### Managed resources
-  package { $autofs::package:
+  package { $autofs::package :
     ensure  => $autofs::manage_package,
     noop    => $autofs::noops,
   }
 
-  service { 'autofs':
+  $nfs_package = $::operatingsystem ? {
+    'Ubuntu' => 'nfs-common',
+    'CentOS' => 'nfs-utils',
+  }
+  
+  service { 'autofs' :
     ensure     => $autofs::manage_service_ensure,
     name       => $autofs::service,
     enable     => $autofs::manage_service_enable,
@@ -349,6 +354,7 @@ class autofs (
     pattern    => $autofs::process,
     require    => Package[$autofs::package],
     noop       => $autofs::noops,
+    subscribe  => Package[$nfs_package, 'sssd'],
   }
 
   # file { 'autofs.conf':
@@ -367,14 +373,14 @@ class autofs (
   # }
 
   # rmdir /nethome 
-  file { '/nethome': 
+  file { '/nethome' : 
     ensure  => absent,
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
     require => Package[$autofs::package],
   }
    # ln -sv /nfs/home /nethome
-  exec{ 'ln -sv /nfs/home /nethome':
+  exec { 'ln -sv /nfs/home /nethome' :
     command => 'ln -sv /nfs/home /nethome',
     creates => '/nethome',
     require => File['/nethome'],
@@ -389,7 +395,7 @@ class autofs (
   }
   
   # /etc/auto.master
-  file{ '/etc/auto.master':
+  file{ '/etc/auto.master' :
     ensure  => present,
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
@@ -398,7 +404,7 @@ class autofs (
   }
   
   # /etc/auto.home
-  file{ '/etc/auto.home':
+  file{ '/etc/auto.home' :
     ensure  => present,
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
@@ -407,7 +413,7 @@ class autofs (
   }
   
   # /etc/auto.nfs
-  file{ '/etc/auto.nfs':
+  file{ '/etc/auto.nfs' :
     ensure  => present,
     owner   => $autofs::config_file_owner,
     group   => $autofs::config_file_group,
@@ -415,6 +421,11 @@ class autofs (
     require => Package[$autofs::package],
   }
 
+  package { $nfs_package :
+    ensure  => installed,
+    notify  => Service['autofs'],
+    require => File['/etc/auto.nfs'],
+  }
 
   # The whole autofs configuration directory can be recursively overriden
   if $autofs::source_dir {

@@ -1,2 +1,4 @@
 /-        /etc/auto.nfs  --timeout=60
 /nfs/home /etc/auto.home --timeout=60
+
+

@@ -84,6 +84,27 @@ class autofs::params {
   $port = ''
   $protocol = 'tcp'
 
+  $idmap_service = $::operatingsystem ? {
+    /(?i:Debian|Ubuntu|Mint)/ => 'idmapd',
+    default                   => 'rpcidmapd',
+  }
+
+  $idmap_nobody_group = $::operatingsystem ? {
+    /(?i:Debian|Ubuntu|Mint)/ => 'nogroup',
+    default                   => 'nobody',
+  }
+ 
+  
+  $idmap_pipefs_dir = $::operatingsystem ? {
+    /(?i:Debian|Ubuntu|Mint)/ => '/run/rpc_pipefs',
+    default                   => '/var/lib/nfs/rpc_pipefs/',
+  }
+
+  $idmap_nobody_user = 'nobody'
+  $idmap_verbosity = '0'
+  $idmap_translation_method = 'nsswitch'
+  $nfsv4_domain = undef
+ 
   # General Settings
   $my_class = ''
   $source = ''

@@ -196,6 +196,28 @@
 #   This is used by monitor, firewall and puppi (optional) components
 #   Can be defined also by the (top scope) variable $autofs_protocol
 #
+# [*nfsv4_domain*]
+#   The NFSv4 Domain used by the ID Mapper, if this value is set 
+#   /etc/idmapd.conf will be loaded from a template and the ID mapper
+#   service enabled. Default: undef
+#
+# [*idmap_service*]
+#   The name of the idmap service
+#
+# [*idmap_nobody_group*]
+#   The idmap nobody group
+#
+# [*idmap_nobody_user*]
+#   The idmap nobody user
+#
+# [*idmap_pipefs_dir*]
+#   The idmap pipefs directory
+#
+# [*idmap_verbosity*]
+#   The idmap verbosity level
+#
+# [*idmap_translation_method*]
+#  The idmap translation method.
 #
 # == Examples
 #
@@ -251,7 +273,14 @@ class autofs (
   $log_dir             = params_lookup( 'log_dir' ),
   $log_file            = params_lookup( 'log_file' ),
   $port                = params_lookup( 'port' ),
-  $protocol            = params_lookup( 'protocol' )
+  $protocol            = params_lookup( 'protocol' ),
+  $nfsv4_domain        = params_lookup( 'nfsv4_domain' ),
+  $idmap_service       = params_lookup( 'idmap_service' ),
+  $idmap_nobody_group  = params_lookup( 'idmap_nobody_group' ),
+  $idmap_nobody_user   = params_lookup( 'idmap_nobody_user' ),
+  $idmap_pipefs_dir    = params_lookup( 'idmap_pipefs_dir' ),
+  $idmap_verbosity     = params_lookup( 'idmap_verbosity' ),
+  $idmap_translation_method = params_lookup( 'idmap_translation_method' ),
   ) inherits autofs::params {
 
   $bool_source_dir_purge=any2bool($source_dir_purge)
@@ -425,6 +454,28 @@ class autofs (
     ensure  => installed,
     notify  => Service['autofs'],
     require => File['/etc/auto.nfs'],
+  }
+
+  #if the nfsv4 domain is set create /etc/idmapd.conf from the template and ensure the idmap service is running
+  if ($nfsv4_domain) {
+
+    #ensure the idmap service is running and configured to start with the system
+    service { "${idmap_service}" :
+      ensure  => running,
+      enable  => true,
+    }
+
+    # /etc/idmapd.conf
+    file { '/etc/idmapd.conf' :
+      ensure => present,
+      mode    => '0644',
+      owner   => 'root',
+      group   => 'root',
+      notify  => Service[$idmap_service],
+      require => Package[$nfs_package],
+      content => template ("${module_name}/idmapd.conf.erb"),
+    }
+
   }
 
   # The whole autofs configuration directory can be recursively overriden

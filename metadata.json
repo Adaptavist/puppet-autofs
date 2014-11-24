@@ -22,17 +22,6 @@
     "tests/init.pp": "6e56182476a8b9f993ea5c0400024adf"
   },
   "dependencies": [
-    {
-      "name": "example42/puppi",
-      "version_requirement": "\u003e\u003d2.0.0"
-    },
-    {
-      "name": "example42/firewall",
-      "version_requirement": "\u003e\u003d2.0.0"
-    },
-    {
-      "name": "example42/monitor",
-      "version_requirement": "\u003e\u003d2.0.0"
-    }
+    
   ]
 }
